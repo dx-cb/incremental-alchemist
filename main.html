@@ -6,14 +6,15 @@
     <link rel="stylesheet" href="styles.css">
     <title>Incremental Alchemist</title>
 </head>
-<body>
+<body onload="switchTab('generators')"> <!-- default to generators tab on load -->  
+
     <nav> <!-- Side menu buttons, need to apply css and js still -->
-        <button id="generatorsTab"> Generators </button>
-        <button id="upgradesTab"> Upgrades </button>
-        <button id="prestigeTab"> Prestige </button>
-        <button id="achievementsTab"> Achievements </button>
-        <button id="statisticsTab"> Statistics </button>
-        <button id="wellnessTab"> Wellness </button>
+        <button id="generatorsTab" onclick="switchTab('generators')"> Generators </button>
+        <button id="upgradesTab" onclick="switchTab('upgrades')"> Upgrades </button>
+        <button id="prestigeTab" onclick="switchTab('prestige')"> Prestige </button>
+        <button id="achievementsTab" onclick="switchTab('achievements')"> Achievements </button>
+        <button id="statisticsTab" onclick="switchTab('statistics')"> Statistics </button>
+        <button id="wellnessTab" onclick="switchTab('wellness')"> Wellness </button>
     </nav>
 
     <main>
@@ -24,14 +25,13 @@
                 </div>
             </section>
 
-            <section id="upgradesSection" class="tabSection"> <!-- page for the upgrades -->
+            <section id="upgradesSection" class="tabSection" > <!-- page for the upgrades -->
                 <h2>Upgrades</h2>
                 
             </section>
 
             <section id="prestigeSection" class="tabSection"> <!-- page for prestiging -->
                 <h2>Prestige</h2>
-                
             </section>
 
             <section id="achievementsSection" class="tabSection"> <!-- achievement page -->
@@ -58,6 +58,6 @@
 
 
 
-    <script src="game.js"></script>
+    <script src="game.js" ></script>
 </body>
 </html>
