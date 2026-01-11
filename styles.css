@@ -1,6 +1,8 @@
 body {
-    background-color: rgb(127, 140, 202);
+    background-color: rgb(60, 40, 24);
+    
 }
-.tabSection { /* side tab */
-    color: rgb(42, 10, 131);
+.tabSection { /* every tab section */
+    color: #aaaaaa;
+    font-family: 'Minecraft', sans-serif;
 }

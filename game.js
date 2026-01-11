@@ -1,5 +1,5 @@
 let gold = 0;//the amount of default currency the player has
-let goldPerSecond = 0; // the gold generated per second
+let goldPerSecond = 1; // the gold generated per second
 let generators = [ //the array of generator objects, will be referenced when creating generators and buying them
     {
         id: 1, //this is gen "1" and i can add gen2,3,4.. later!
@@ -12,6 +12,17 @@ let generators = [ //the array of generator objects, will be referenced when cre
     }
 ];
 
+setInterval(gameLoop, 1000); //runs the game loop every second that passes
+
+
+
+
+//functions
+
+function gameLoop() {
+    gold += goldPerSecond
+    updateUI(); //update the ui so new gold and gps can be seen
+}
 
 function createGenerators() { //function to create the generator elements on the page
     const container = document.getElementById('generatorsContainer'); //get the container from the html (where the gens will be displayed on the page))
@@ -37,7 +48,7 @@ function createGenerators() { //function to create the generator elements on the
 
         const button = document.createElement('button'); //create a button to buy the generator 
         button.textContent = 'Buy 1';
-        button.onclick = () => buyGenerator(i); //idk to use i or gen.id here
+        button.onclick = () => buyGenerator(i); //add a button to buy, when clicked, buyGenerator will run
     }
         div.appendChild(title); //add the title to the div
         div.appendChild(cost);  //add the cost to the div
@@ -46,8 +57,7 @@ function createGenerators() { //function to create the generator elements on the
         div.appendChild(button); //add the button to the div
 
         container.appendChild(div); //add the div to the container in the html
-}
-
+} 
 
 function buyGenerator(index) { //function to buy a generator (index is the position in the generators array)
     const gen = generators[index]; //get the specific generator object at the inputted index
@@ -58,13 +68,17 @@ function buyGenerator(index) { //function to buy a generator (index is the posit
         gen.cost = newCost(gen); //update the cost for the next purchase - talk more in nea - create a function called newCost(gen) later
         
         //changes done so need to update screen
-        updateUI(); //still in progress
-        recalculateGoldPerSecond(); //still in progress
+        updateUI(); //update the user interface
+        recalculateGoldPerSecond(); //in the name
 
     }
+} 
+
+function updateUI() { //function to update the user interface
+    document.getElementById('goldDisplay').textContent = `Gold: ${gold}`;
+    document.getElementById('gpsDisplay').textContent = `Gold per second: ${goldPerSecond}`; //both of these change the gold and gps display directly
+    createGenerators(); //recreate the generators to update their info
 }
-
-
 
 function switchTab(tabname) { //function to switch between tabs
     //hide all tabs
@@ -76,28 +90,10 @@ function switchTab(tabname) { //function to switch between tabs
     document.getElementById(tabname + 'Section').style.display = 'block'; //show the selected tab section
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function updateUI() {
-    
-}
-function createGenerators() {
-
-}
-function buyGenerator() {
-
+function recalculateGoldPerSecond() { //function to recalculate the total gold per second based on owned generators
+    goldPerSecond = 0; //reset gps to 0 before recalculating
+    for (let i = 0; i < generators.length; i++) { //loop through each generator
+        const gen = generators[i];
+        goldPerSecond += gen.production * gen.quantity; //add the production of every owned generator to the total gps
+    }
 }
