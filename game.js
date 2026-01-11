@@ -12,6 +12,8 @@ let generators = [ //the array of generator objects, will be referenced when cre
     }
 ];
 
+//game loop
+
 setInterval(gameLoop, 1000); //runs the game loop every second that passes
 
 
