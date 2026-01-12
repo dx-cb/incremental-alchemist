@@ -1,12 +1,12 @@
 let gold = 0;//the amount of default currency the player has
-let goldPerSecond = 1; // the gold generated per second
+let goldPerSecond = 10; // the gold generated per second
 let generators = [ //the array of generator objects, will be referenced when creating generators and buying them
     {
         id: 1, //this is gen "1" and i can add gen2,3,4.. later!
         baseCost: 10,
         cost: 10,
         production: 1,
-        quantity: 0,
+        quantity: 1,
         costMultiplier: 1.15
 
     }
@@ -51,7 +51,7 @@ function createGenerators() { //function to create the generator elements on the
         const button = document.createElement('button'); //create a button to buy the generator 
         button.textContent = 'Buy 1';
         button.onclick = () => buyGenerator(i); //add a button to buy, when clicked, buyGenerator will run
-    }
+    
         div.appendChild(title); //add the title to the div
         div.appendChild(cost);  //add the cost to the div
         div.appendChild(owned); //add the owned to the div      
@@ -59,6 +59,7 @@ function createGenerators() { //function to create the generator elements on the
         div.appendChild(button); //add the button to the div
 
         container.appendChild(div); //add the div to the container in the html
+    }
 } 
 
 function buyGenerator(index) { //function to buy a generator (index is the position in the generators array)
