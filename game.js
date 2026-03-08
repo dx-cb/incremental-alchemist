@@ -177,3 +177,4 @@ function recalculateGoldPerSecond() { //function to recalculate the total gold p
         goldPerSecond += gen.production * gen.quantity; //add the production of every owned generator to the total gps
     }
 }
+}
