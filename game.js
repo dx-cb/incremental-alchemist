@@ -61,6 +61,7 @@ let generators = [ //the array of generator objects, will be referenced when cre
 //game loop
 
 setInterval(gameLoop, 1000); //runs the game loop every second that passes
+setInterval(saveGame, 30000); //auto saves the game every 30 seconds as a backup    
 
 
 
@@ -68,10 +69,24 @@ setInterval(gameLoop, 1000); //runs the game loop every second that passes
 //functions
 
 function saveGame() { //function to save the game state to local storage
+    const gameData = { //object literal to store game data that needs to be saved
+        gold: gold,
+        goldPerSecond: goldPerSecond,
+        generators: generators
+    };
+    localStorage.setItem('incrementalAlchemistSave', JSON.stringify(gameData)); //save the game data as a string in local storage
+}
 
 function loadGame() { //function to load the game state from local storage
-
+    const savedData = localStorage.getItem('incrementalAlchemistSave'); //get the saved game data from local storage
+    if (savedData) { //if there is saved data, load it
+        const gameData = JSON.parse(savedData); //parse the saved data back into an object
+        gold = gameData.gold; //load the gold amount
+        goldPerSecond = gameData.goldPerSecond; //load the gps amount
+        generators = gameData.generators; //load the generators array
+    }
 }
+
 function unlockGenerators() { //function to check if new generators should be unlocked based on current gold
     for (let i = 0; i < generators.length; i++) { //loop through each generator
         const gen = generators[i];
@@ -81,7 +96,8 @@ function unlockGenerators() { //function to check if new generators should be un
     }
 }
 function startUp() { //function to run when the page loads - can add more funcions inside this later if needed
-    //recalculateGoldPerSecond() 
+    loadGame()
+    recalculateGoldPerSecond() 
     switchTab('generators')
     updateUI()
 }
@@ -143,6 +159,7 @@ function buyGenerator(index) { //function to buy a generator (index is the posit
         
         unlockGenerators(); //check if new generators should be unlocked based on current gold since the gold amount will change after a purchase
         recalculateGoldPerSecond(); //in the name
+        saveGame(); //save the game after each purchase so progress is not lost
         updateUI(); //update the user interface
 
     }
@@ -176,5 +193,4 @@ function recalculateGoldPerSecond() { //function to recalculate the total gold p
         const gen = generators[i];
         goldPerSecond += gen.production * gen.quantity; //add the production of every owned generator to the total gps
     }
-}
 }
