@@ -58,6 +58,30 @@ let generators = [ //the array of generator objects, will be referenced when cre
     }
 ];
 
+let upgrades = [
+    {   
+        id: 1,
+        name: "",
+        description: "Double Generator 1 production",
+        cost: 25,
+        purchased: false
+    },
+    {
+        id: 2,
+        name: "",
+        description: "Double Generator 2 production",
+        cost: 250,
+        purchased: false
+    },
+    {
+        id: 3,
+        name: "",
+        description: "Increase all generator production by 50%",
+        cost: 2500,
+        purchased: false
+    }
+];
+
 //game loop
 
 setInterval(gameLoop, 1000); //runs the game loop every second that passes
@@ -107,6 +131,36 @@ function gameLoop() {
     gold += goldPerSecond
     updateUI(); //update the ui so new gold and gps can be seen
     unlockGenerators(); //check if new generators should be unlocked based on current gold since the gold amount will change each game loop
+}
+
+function createUpgrades() { //function to create the upgrade elements on the page
+    const container = document.getElementById('upgradesContainer'); //get the div 
+    container.innerHTML = ''; //clear before creating so it doesnt duplicate upgrades
+    for (let i = 0; i < upgrades.length; i++) { //loop through each upgrade
+        const upgrade = upgrades[i]; //get the current upgrade object
+        const div = document.createElement("div"); //create a div to display the upgrade info to then place in the upgrades container
+        div.className = "upgrade"; //class name for css
+
+        const title = document.createElement("h3");//title element
+        title.textContent = `Upgrade ${upgrade.id}`;
+
+        const description = document.createElement("p");//description element
+        description.textContent = upgrade.description;
+
+        const cost = document.createElement("p");//cost element
+        cost.textContent = `Cost: ${upgrade.cost} gold`;
+
+        const button = document.createElement("button");//button to buy the upgrade
+        button.textContent = "Buy Upgrade";
+        button.onclick = () => buyUpgrade(i); //calls the buyUpgrade function
+
+        div.appendChild(title); 
+        div.appendChild(description);
+        div.appendChild(cost);
+        div.appendChild(button); 
+
+        container.appendChild(div); //add everything to the div to then add to the container
+    }
 }
 
 function createGenerators() { //function to create the generator elements on the page
@@ -175,6 +229,7 @@ function updateUI() { //function to update the user interface
     document.getElementById('goldDisplay').textContent = `Gold: ${gold}`;
     document.getElementById('gpsDisplay').textContent = `Gold per second: ${goldPerSecond}`; //both of these change the gold and gps display directly
     createGenerators(); //recreate the generators to update their info
+    createUpgrades(); //recreate the upgrades to update their info
 }
 
 function switchTab(tabname) { //function to switch between tabs
