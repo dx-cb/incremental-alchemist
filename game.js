@@ -79,7 +79,7 @@ let upgrades = [
         description: "Increase all generator production by 50%",
         cost: 2500,
         purchased: false
-    }
+    },
 ];
 
 //game loop
@@ -119,6 +119,7 @@ function unlockGenerators() { //function to check if new generators should be un
         }
     }
 }
+
 function startUp() { //function to run when the page loads - can add more funcions inside this later if needed
     loadGame()
     recalculateGoldPerSecond() 
@@ -160,6 +161,35 @@ function createUpgrades() { //function to create the upgrade elements on the pag
         div.appendChild(button); 
 
         container.appendChild(div); //add everything to the div to then add to the container
+    }
+}
+
+function buyUpgrade(index) { //called when button to buy an upgrade is clicked, index is the position of the upgrade in the upgrade array
+    const upgrade = upgrades[index]; //get the specific upgrade object at the inputted index
+
+    if (gold >= upgrade.cost && upgrade.purchased === false) { //check if the player has enough gold to buy the upgrade and if it is not already purchased
+        gold -= upgrade.cost; //subtract the cost from the gold
+        upgrade.purchased = true; //mark the upgrade as purchased, so that it cant be bought again
+        applyUpgrade(upgrade); //apply the effects of the upgrade
+
+        recalculateGoldPerSecond(); //recalculate the total gps since it may have changed
+        saveGame(); //save game incase of data loss
+        updateUI(); //update the user interface to show the changes from the upgrade
+        
+}
+}
+
+function applyUpgrade(upgrade) { //function to apply the effects of an upgrade after purchase AND overall this function will use selection to go through each upgrade id to see what effects to apply
+    if (upgrade.id === 1) {                                 
+        generators[0].production *= 2; //double the production of generator 1
+    }
+    if (upgrade.id === 2) {
+        generators[1].production *= 2; //double the production of generator 2
+    }
+    if (upgrade.id === 3) {
+        for (let i = 0; i < generators.length; i++) { //loop through each generator in the generators array
+            generators[i].production *= 1.5; //increase the production of all generators by 50%
+        }
     }
 }
 
@@ -226,8 +256,12 @@ function newCost(gen) { //function to calculate the new cost of a generator afte
 }
 
 function updateUI() { //function to update the user interface
-    document.getElementById('goldDisplay').textContent = `Gold: ${gold}`;
-    document.getElementById('gpsDisplay').textContent = `Gold per second: ${goldPerSecond}`; //both of these change the gold and gps display directly
+    document.getElementById('goldDisplayGenerators').textContent = `Gold: ${gold}`;
+    document.getElementById('gpsDisplayGenerators').textContent = `Gold per second: ${goldPerSecond}`; //both of these change the gold and gps display directly in the generator tab
+    document.getElementById('goldDisplayUpgrades').textContent = `Gold: ${gold}`;
+    document.getElementById('gpsDisplayUpgrades').textContent = `Gold per second: ${goldPerSecond}`; //gold and gps for upgrades tab
+    document.getElementById('goldDisplayPrestige').textContent = `Gold: ${gold}`;
+    document.getElementById('gpsDisplayPrestige').textContent = `Gold per second: ${goldPerSecond}`; //gold and gps for prestige tab
     createGenerators(); //recreate the generators to update their info
     createUpgrades(); //recreate the upgrades to update their info
 }

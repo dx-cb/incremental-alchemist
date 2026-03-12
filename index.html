@@ -23,25 +23,35 @@
                     <h2>Generators</h2>
                     
                     <!-- gold information -->
-                        <div id="goldInfo"> 
-                            <p id="goldDisplay">Gold: 0</p>
-                            <p id="gpsDisplay">Gold per second: 0</p>
+                        <div id="goldInfoGenerators"> 
+                            <p id="goldDisplayGenerators">Gold: 0</p>
+                            <p id="gpsDisplayGenerators">Gold per second: 0</p>
                             <button onclick="saveGame(); alert('Game saved!')">Save Game</button>
                         </div>
-                    
-                        <div id="generatorsContainer">
-                        <!-- i will create gens here using js later -->
+                        
+                        <div id="generatorsContainer"> <!-- generators are created here from js -->
                     </div>
                 </section>
 
                 <section id="upgradesSection" class="tabSection" > <!-- page for the upgrades -->
                     <h2>Upgrades</h2>
-                    <div id="upgradesContainer"></div>
-                    
+                    <!-- gold information -->
+                        <div id="goldInfoUpgrades"> 
+                            <p id="goldDisplayUpgrades">Gold: 0</p>
+                            <p id="gpsDisplayUpgrades">Gold per second: 0</p>
+                            <button onclick="saveGame(); alert('Game saved!')">Save Game</button>
+                        </div>
+                    <div id="upgradesContainer"></div> <!-- upgrades are created here from js-->
                 </section>
 
                 <section id="prestigeSection" class="tabSection"> <!-- page for prestiging -->
                     <h2>Prestige</h2>
+                    <!-- gold information -->
+                        <div id="goldInfoPrestige"> 
+                            <p id="goldDisplayPrestige">Gold: 0</p>
+                            <p id="gpsDisplayGenerators">Gold per second: 0</p>
+                            <button onclick="saveGame(); alert('Game saved!')">Save Game</button>
+                        </div>
                 </section>
 
                 <section id="achievementsSection" class="tabSection"> <!-- achievement page -->
@@ -60,14 +70,6 @@
                 </section>
                 
         </main>
-
-
-        
-
-
-
-
-
         <script src="game.js" ></script>
     </body>
     </html>
