@@ -5,6 +5,7 @@ let generators = [ //the array of generator objects, will be referenced when cre
         id: 1, //generator 1
         baseCost: 10,
         cost: 10,
+        baseProduction: 1,
         production: 1,
         quantity: 0,
         costMultiplier: 1.15,
@@ -15,6 +16,7 @@ let generators = [ //the array of generator objects, will be referenced when cre
         id: 2, //generator 2
         baseCost: 100,
         cost: 100,
+        baseProduction: 10,
         production: 10,
         quantity: 0,
         costMultiplier: 1.17,
@@ -24,6 +26,7 @@ let generators = [ //the array of generator objects, will be referenced when cre
         id: 3, //generator 3
         baseCost: 1000,
         cost: 1000,
+        baseProduction: 50,
         production: 50,
         quantity: 0,
         costMultiplier: 1.20,
@@ -33,6 +36,7 @@ let generators = [ //the array of generator objects, will be referenced when cre
         id: 4, //generator 4
         baseCost: 10000,
         cost: 10000,
+        baseProduction: 500,
         production: 500,
         quantity: 0,
         costMultiplier: 1.25,
@@ -42,6 +46,7 @@ let generators = [ //the array of generator objects, will be referenced when cre
         id: 5, //generator 5    
         baseCost: 100000,
         cost: 100000,
+        baseProduction: 3000,
         production: 3000,
         quantity: 0,
         costMultiplier: 1.30,
@@ -51,6 +56,7 @@ let generators = [ //the array of generator objects, will be referenced when cre
         id: 6, //generator 6
         baseCost: 1000000,
         cost: 1000000,
+        baseProduction: 20000,
         production: 20000,
         quantity: 0,
         costMultiplier: 1.35,
@@ -58,7 +64,7 @@ let generators = [ //the array of generator objects, will be referenced when cre
     }
 ];
 
-let upgrades = [
+let upgrades = [ //the array of upgrade objects, will be referenced when creating upgrades and buying them
     {   
         id: 1,
         name: "",
@@ -102,6 +108,7 @@ function saveGame() { //function to save the game state to local storage
 }
 
 function loadGame() { //function to load the game state from local storage
+    
     const savedData = localStorage.getItem('incrementalAlchemistSave'); //get the saved game data from local storage
     if (savedData) { //if there is saved data, load it
         const gameData = JSON.parse(savedData); //parse the saved data back into an object
@@ -109,6 +116,28 @@ function loadGame() { //function to load the game state from local storage
         goldPerSecond = gameData.goldPerSecond; //load the gps amount
         generators = gameData.generators; //load the generators array
     }
+}
+
+function resetGame() { //function to reset the game state and clear local storage
+    
+    //reset values to default
+    gold = 10; 
+    goldPerSecond = 0;
+    for (let i = 0; i < generators.length; i++) { //loop through each generator to reset their values to default
+        generators[i].cost = generators[i].baseCost; //reset the cost to the base cost
+        generators[i].production = generators[i].baseProduction; //reset the production to the base production
+        generators[i].quantity = 0; //reset quantity for all generators to 0
+
+        if (generators[i].id > 2) { //gen 1 and 2 can stay unlocked but the rest need to be locked again
+            generators[i].unlocked = false; //lock the gen 3-6
+        }
+    }
+    for (let i =0; i < upgrades.length; i++) { //loop through each upgrade to reset their values to default
+        upgrades[i].purchased = false; //all upgrades should now be unbought
+    }
+    saveGame(); //replace the saved game data in local storage with the reset game data
+    updateUI(); //update the user interface to reflect the reset game state
+    alert("Game has been reset!"); //alert the player that the game has been reset
 }
 
 function unlockGenerators() { //function to check if new generators should be unlocked based on current gold
@@ -127,7 +156,7 @@ function startUp() { //function to run when the page loads - can add more funcio
     updateUI()
 }
 
-function gameLoop() {
+function gameLoop() { //function to run every second to update the game state
     recalculateGoldPerSecond(); //update gps before adding gold
     gold += goldPerSecond
     updateUI(); //update the ui so new gold and gps can be seen
@@ -153,6 +182,7 @@ function createUpgrades() { //function to create the upgrade elements on the pag
 
         const button = document.createElement("button");//button to buy the upgrade
         button.textContent = "Buy Upgrade";
+        button.disabled = gold < upgrade.cost || upgrade.purchased === true; //disable the button if the player does not have enough gold to buy the upgrade OR if it is already purchased
         button.onclick = () => buyUpgrade(i); //calls the buyUpgrade function
 
         div.appendChild(title); 
@@ -213,11 +243,13 @@ function createGenerators() { //function to create the generator elements on the
                 const owned = document.createElement('p'); //need to show how many owned
                 owned.textContent = `Owned: ${gen.quantity}`;
 
-                const production = document.createElement('p'); //need to show gold gained per sec
-                production.textContent = `Production: +${gen.production * gen.quantity} gold/sec`; //multiply by quantity to show total production from that gen not just from one gen
+                const production = document.createElement('p'); //need to show the production of the generator
+                production.textContent = `This generator is producing ${gen.production * gen.quantity} gold/sec `;
 
                 const button = document.createElement('button'); //create a button to buy the generator 
                 button.textContent = 'Buy 1';
+                button.disabled = gold < gen.cost; //disable the button if the player does not have enough gold to buy the generator
+                button.title = `+${gen.production} gold/sec`;
                 button.onclick = () => buyGenerator(i); //add a button to buy, when clicked, buyGenerator will run
             
                 div.appendChild(title); //add the title to the div
