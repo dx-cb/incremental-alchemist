@@ -25,7 +25,7 @@ let generators = [ //the array of generator objects, will be referenced when cre
     {
         id: 3, //generator 3
         baseCost: 1000,
-        cost: 1000,
+        cost:   ,
         baseProduction: 50,
         production: 50,
         quantity: 0,
@@ -102,7 +102,8 @@ function saveGame() { //function to save the game state to local storage
     const gameData = { //object literal to store game data that needs to be saved
         gold: gold,
         goldPerSecond: goldPerSecond,
-        generators: generators
+        generators: generators,
+        upgrades: upgrades
     };
     localStorage.setItem('incrementalAlchemistSave', JSON.stringify(gameData)); //save the game data as a string in local storage
 }
