@@ -1,5 +1,6 @@
 let gold = 10;//the amount of default currency the player has
 let goldPerSecond = 0; // the gold generated per second
+let numberFormat = 'none'; // default number format but can also be "scientific" or "engineering" or "mixed"
 let generators = [ //the array of generator objects, will be referenced when creating generators and buying them
     {
         id: 1, //generator 1
@@ -116,29 +117,32 @@ function loadGame() { //function to load the game state from local storage
         gold = gameData.gold; //load the gold amount
         goldPerSecond = gameData.goldPerSecond; //load the gps amount
         generators = gameData.generators; //load the generators array
+        upgrades = gameData.upgrades; //load the upgrades array
     }
 }
 
 function resetGame() { //function to reset the game state and clear local storage
     
-    //reset values to default
-    gold = 10; 
-    goldPerSecond = 0;
-    for (let i = 0; i < generators.length; i++) { //loop through each generator to reset their values to default
-        generators[i].cost = generators[i].baseCost; //reset the cost to the base cost
-        generators[i].production = generators[i].baseProduction; //reset the production to the base production
-        generators[i].quantity = 0; //reset quantity for all generators to 0
+    if (confirm("Are you sure you want to erase your save data and reset your game? This cant be undone!")) { //another check to make sure the player doesnt accidentally reset their game
+        //reset values to default
+        gold = 10; 
+        goldPerSecond = 0;
+        for (let i = 0; i < generators.length; i++) { //loop through each generator to reset their values to default
+            generators[i].cost = generators[i].baseCost; //reset the cost to the base cost
+            generators[i].production = generators[i].baseProduction; //reset the production to the base production
+            generators[i].quantity = 0; //reset quantity for all generators to 0
 
-        if (generators[i].id > 2) { //gen 1 and 2 can stay unlocked but the rest need to be locked again
-            generators[i].unlocked = false; //lock the gen 3-6
+            if (generators[i].id > 2) { //gen 1 and 2 can stay unlocked but the rest need to be locked again
+                generators[i].unlocked = false; //lock the gen 3-6
+            }
         }
+        for (let i =0; i < upgrades.length; i++) { //loop through each upgrade to reset their values to default
+            upgrades[i].purchased = false; //all upgrades should now be unbought
+        }
+        saveGame(); //replace the saved game data in local storage with the reset game data
+        updateUI(); //update the user interface to reflect the reset game state
+        alert("Game has been reset!"); //alert the player that the game has been reset
     }
-    for (let i =0; i < upgrades.length; i++) { //loop through each upgrade to reset their values to default
-        upgrades[i].purchased = false; //all upgrades should now be unbought
-    }
-    saveGame(); //replace the saved game data in local storage with the reset game data
-    updateUI(); //update the user interface to reflect the reset game state
-    alert("Game has been reset!"); //alert the player that the game has been reset
 }
 
 function unlockGenerators() { //function to check if new generators should be unlocked based on current gold
@@ -205,23 +209,24 @@ function buyUpgrade(index) { //called when button to buy an upgrade is clicked, 
 
         recalculateGoldPerSecond(); //recalculate the total gps since it may have changed
         saveGame(); //save game incase of data loss
-        updateUI(); //update the user interface to show the changes from the upgrade
-        
+        updateUI(); //update the user interface to show the changes from the upgrade    
 }
 }
 
 function applyUpgrade(upgrade) { //function to apply the effects of an upgrade after purchase AND overall this function will use selection to go through each upgrade id to see what effects to apply
-    if (upgrade.id === 1) {                                 
-        generators[0].production *= 2; //double the production of generator 1
-    }
-    if (upgrade.id === 2) {
-        generators[1].production *= 2; //double the production of generator 2
-    }
-    if (upgrade.id === 3) {
-        for (let i = 0; i < generators.length; i++) { //loop through each generator in the generators array
-            generators[i].production *= 1.5; //increase the production of all generators by 50%
-        }
-    }
+    if (upgrade.purchased) {
+        if (upgrade.id === 1) {                                 
+                generators[0].production *= 2; //double the production of generator 1
+            }
+            if (upgrade.id === 2) {
+                generators[1].production *= 2; //double the production of generator 2
+            }
+            if (upgrade.id === 3) {
+                for (let i = 0; i < generators.length; i++) { //loop through each generator in the generators array
+                    generators[i].production *= 1.5; //increase the production of all generators by 50%
+                }
+            }
+}
 }
 
 function createGenerators() { //function to create the generator elements on the page
@@ -314,5 +319,49 @@ function recalculateGoldPerSecond() { //function to recalculate the total gold p
     for (let i = 0; i < generators.length; i++) { //loop through each generator
         const gen = generators[i];
         goldPerSecond += gen.production * gen.quantity; //add the production of every owned generator to the total gps
+    }
+}
+
+function setFormat(format) { // updates the number format setting
+    numberFormat = format;
+    saveGame(); // save the chosen format
+    updateUI(); // refresh display
+}
+
+function formatNumber(n) {
+    if (numberFormat === 'scientific') { //scientific notation
+        return n.toExponential(2); // scientific notation with 2 decimal places
+    }
+    if (numberFormat === 'engineering') { //engineering notation
+        if (n>999999) { // only change if if number is > 1 million 
+            const suffixes = ["M", "B", "T", "Qa","Qi","Sx","Sp","Oc","No"]; // array to hold suffixes for engineering notation
+            const tier = Math.floor(Math.log10(n) / 3); // determine the tier of the number
+            const coefficient = n / Math.pow(1000, tier); // make the number look "smaller"
+            return coefficient.toFixed(2) + suffixes[tier - 2]; //combine the coefficient with the appropriate suffix
+        }
+        if (n>999 && n<1000000) { //if the number is between 1 thousand and 1 million then use K for engineering notation
+            const coefficient = n / 1000;
+            return coefficient.toFixed(2) + 'K';
+        }
+        if (n<1000) { //if the number is less than 1 thousand just return the number
+            return n;
+        }
+    }
+    if (numberFormat === 'mixed') { //mixed notation, both engineering and scientific depending on size of n
+        if (1000 <= n && n <= 999999) { //if the number is less than 1 million, use engineering notation
+            const suffixes = ['K', 'M']; //smaller array since enginering notation is used only early on
+            const tier = Math.floor(Math.log10(n) / 3);
+            const coefficient = n / Math.pow(1000, tier); //same calculation as engineering notation
+            return coefficient.toFixed(2) + suffixes[tier - 1]; //combine the coefficient with the appropriate suffix again but tier -1 since K starts at 10^3
+        }
+        if (n<1000) { //if the number is less than one thousand, just return the number
+            return n;
+        }        
+        if (n >= 1000000) { //if the number is greater than or equal to 1 million, use scientific notation
+            return n.toExponential(2); // scientific notation with 2 decimal places
+        }
+    }
+    if (numberFormat === 'none') { //if no format is selected, just return the number
+        return n;
     }
 }

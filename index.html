@@ -9,13 +9,14 @@
     </head>
     <body onload="startUp()"> <!-- default to generators tab on load -->  
 
-        <nav> <!-- Side menu buttons, need to apply css and js still -->
+        <nav> <!-- Side menu buttons-->
             <button id="generatorsTab" onclick="switchTab('generators')"> Generators </button>
             <button id="upgradesTab" onclick="switchTab('upgrades')"> Upgrades </button>
             <button id="prestigeTab" onclick="switchTab('prestige')"> Prestige </button>
             <button id="achievementsTab" onclick="switchTab('achievements')"> Achievements </button>
             <button id="statisticsTab" onclick="switchTab('statistics')"> Statistics </button>
             <button id="wellnessTab" onclick="switchTab('wellness')"> Wellness </button>
+            <button id="settingsTab" onclick="switchTab('settings')"> Settings </button>
         </nav>
 
         <main>
@@ -62,15 +63,21 @@
                 <section id="statisticsSection" class="tabSection"> <!-- page for stats -->
                     <h2>Statistics</h2>
 
-                    <div id="resetContainer"><!-- reset button -->
-                        <button onclick="resetGame()">Reset Game</button>
-                    </div> 
+ 
                 </section>
 
                 <section id="wellnessSection" class="tabSection"> <!-- page for my wellness reminder thingy -->
                     <h2>Wellness</h2>
-                    <button onclick="localStorage.clear(); location.reload()">Clear Storage</button>
-                    
+                </section>
+
+                <section id="settingsSection" class="tabSection"> <!-- settings page -->
+                    <h2>Settings</h2>
+
+                    <button onclick="localStorage.clear(); location.reload()">Clear Storage</button> <!-- clears local storage and then refreshes the page -->                    
+
+                    <div id="resetContainer">
+                        <button onclick="resetGame(); switchTab('generators')">Reset Save Data</button>  <!-- reset button -->
+                    </div>                
                 </section>
                 
         </main>
