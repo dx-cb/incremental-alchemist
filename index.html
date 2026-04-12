@@ -49,10 +49,14 @@
                     <h2>Prestige</h2>
                     <!-- gold information -->
                         <div id="goldInfoPrestige"> 
-                            <p id="goldDisplayPrestige">Gold: 0</p>
+                            <p id="goldDisplayPrestige">Gold: 0</p> <!-- gold display for prestige section -->
                             <p id="gpsDisplayPrestige">Gold per second: 0</p>
-                            <button onclick="saveGame(); alert('Game saved!')">Save Game</button>
+                            <button onclick="saveGame(); alert('Game saved!')">Save Game</button> <!-- button to save the game -->
                         </div>
+                        <p id="alchemyPointsDisplay">Alchemy Points: 0</p>
+                        <p id="pointsPreview">Alchemy Points available this run: 0</p>
+                        <div id="prestigeUpgradesContainer"></div> <!-- prestige upgrades are created here from js -->
+                        <button onclick="prestige()">PRESTIGE</button> <!-- button to prestige -->
                 </section>
 
                 <section id="achievementsSection" class="tabSection"> <!-- achievement page -->
@@ -74,10 +78,18 @@
                     <h2>Settings</h2>
 
                     <button onclick="localStorage.clear(); location.reload()">Clear Storage</button> <!-- clears local storage and then refreshes the page -->                    
-
                     <div id="resetContainer">
                         <button onclick="resetGame(); switchTab('generators')">Reset Save Data</button>  <!-- reset button -->
-                    </div>                
+                    </div> 
+
+                    <div id="numberFormatContainer"> <!-- number format options -->
+                        <p>Number Format:</p> <!-- options for formatting numbers  -->
+                        <button onclick="setFormat('none')">None</button>
+                        <button onclick="setFormat('scientific')">Scientific</button>
+                        <button onclick="setFormat('engineering')">Engineering</button>
+                        <button onclick="setFormat('mixed')">Mixed</button>
+                    </div>
+                                   
                 </section>
                 
         </main>

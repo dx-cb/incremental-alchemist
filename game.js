@@ -1,5 +1,7 @@
 let gold = 10;//the amount of default currency the player has
 let goldPerSecond = 0; // the gold generated per second
+let alchemyPoints = 0; //the currency used for prestige
+let alchemyPointsPerSecond = 0; //the alchemy points generated per second, will be used in the prestige tab 
 let numberFormat = 'none'; // default number format but can also be "scientific" or "engineering" or "mixed"
 let generators = [ //the array of generator objects, will be referenced when creating generators and buying them
     {
@@ -88,6 +90,43 @@ let upgrades = [ //the array of upgrade objects, will be referenced when creatin
         purchased: false
     },
 ];
+let prestigeUpgrades = [ //array of prestige upgrade objects, will be referenced when creating prestige upgrades and buying them
+    {
+        id: 1,
+        name: "",
+        description: "Increase alchemy point gain by 50%",
+        cost: 1,
+        purchased: false
+    },
+    {
+        id: 2,
+        name: "",
+        description: "Increase gold gain by 20%",
+        cost: 1,
+        purchased: false
+    },
+    {
+        id: 3,
+        name: "",
+        description: "x2 all generator production",
+        cost: 1,
+        purchased: false
+    },
+    {
+        id: 4,
+        name: "",
+        description: "x5 all generator production",
+        cost: 2,
+        purchased: false
+    },
+    {
+        id: 5,
+        name: "",
+        description: "Unlock a secret generator...",
+        cost: 100,
+        purchased: false
+    }
+];
 
 //game loop
 
@@ -99,12 +138,14 @@ setInterval(saveGame, 30000); //auto saves the game every 30 seconds as a backup
 
 //functions
 
-function saveGame() { //function to save the game state to local storage
+function saveGame() { //function to save the game state to local storage    
     const gameData = { //object literal to store game data that needs to be saved
         gold: gold,
         goldPerSecond: goldPerSecond,
         generators: generators,
-        upgrades: upgrades
+        upgrades: upgrades,
+        alchemyPoints: alchemyPoints,
+        prestigeUpgrades: prestigeUpgrades
     };
     localStorage.setItem('incrementalAlchemistSave', JSON.stringify(gameData)); //save the game data as a string in local storage
 }
@@ -118,6 +159,8 @@ function loadGame() { //function to load the game state from local storage
         goldPerSecond = gameData.goldPerSecond; //load the gps amount
         generators = gameData.generators; //load the generators array
         upgrades = gameData.upgrades; //load the upgrades array
+        alchemyPoints = gameData.alchemyPoints; //load the alchemy points amount
+        prestigeUpgrades = gameData.prestigeUpgrades; //load the prestige upgrades array
     }
 }
 
@@ -127,6 +170,7 @@ function resetGame() { //function to reset the game state and clear local storag
         //reset values to default
         gold = 10; 
         goldPerSecond = 0;
+        alchemyPoints = 0;
         for (let i = 0; i < generators.length; i++) { //loop through each generator to reset their values to default
             generators[i].cost = generators[i].baseCost; //reset the cost to the base cost
             generators[i].production = generators[i].baseProduction; //reset the production to the base production
@@ -156,6 +200,9 @@ function unlockGenerators() { //function to check if new generators should be un
 
 function startUp() { //function to run when the page loads - can add more funcions inside this later if needed
     loadGame()
+    for (let i = 0; i < prestigeUpgrades.length; i++) { // reapply prestige upgrades on load
+        applyPrestigeUpgrade(prestigeUpgrades[i]);
+    }
     recalculateGoldPerSecond() 
     switchTab('generators')
     updateUI()
@@ -183,7 +230,7 @@ function createUpgrades() { //function to create the upgrade elements on the pag
         description.textContent = upgrade.description;
 
         const cost = document.createElement("p");//cost element
-        cost.textContent = `Cost: ${upgrade.cost} gold`;
+        cost.textContent = `Cost: ${formatNumber(upgrade.cost)} gold`;
 
         const button = document.createElement("button");//button to buy the upgrade
         button.textContent = "Buy Upgrade";
@@ -229,6 +276,66 @@ function applyUpgrade(upgrade) { //function to apply the effects of an upgrade a
 }
 }
 
+function applyPrestigeUpgrade(upgrade) { //function to apply the effects of a prestige upgrade after purchase, will use selection to determine which upgrade effects to apply based on the id of the upgrade
+    if (upgrade.purchased) { //check if the upgrade is purchased before applying its effects
+        if (upgrade.id === 2) {
+            for (let i = 0; i < generators.length; i++) { //loop through each generator in the generators array
+                generators[i].production *= 1.2; //increase gold gain by 20% by multiplying the production of all generators by 1.2
+            }
+        }
+        if (upgrade.id === 3) {
+            for (let i = 0; i < generators.length; i++) { //loop through each generator in the generators array
+                generators[i].production *= 2; //double all generator production by multiplying by 2
+            }
+        }
+        if (upgrade.id === 4) {
+            for (let i = 0; i < generators.length; i++) { //loop through each generator in the generators array
+                generators[i].production *= 5; //x5 all generator production by multiplying by 5
+            }
+        }
+        if (upgrade.id === 5) {
+                //sort later    unlock a secret generator
+        }
+        }
+}
+
+function calculateAlchemyPoints() { //function to calculate the amount of alchemy points the player should gain upon prestiging, will be based on the total gold the player has
+    if (gold < 1e6) return 0; // no points until 1e6
+    let points = Math.floor((Math.log10(gold) - 6) / 4) + 1; // 1 at 1e6, 2 at 1e10, 3 at 1e14 and so on
+    if (prestigeUpgrades[0].purchased) {
+        points = Math.floor(points * 1.5); // upgrade 1 bonus
+    }
+    return points;    
+}
+
+function prestige() { //function to reset the game state but keep alchemy points, called when the prestige button is clicked
+    const pointsGained = calculateAlchemyPoints(); //pointsGained = the amount of alchemy points the player will gain from prestiging, calculated by the calculateAlchemyPoints function
+    if (pointsGained < 1) { //no points gained
+        alert("You need more gold to prestige!");
+        return; // exits the function only if cant prestige, otherwise continues
+    }
+    alchemyPoints += pointsGained;
+    // reset but keep alchemy points
+    gold = 10;
+    goldPerSecond = 0;
+    for (let i = 0; i < generators.length; i++) {
+        generators[i].cost = generators[i].baseCost;
+        generators[i].production = generators[i].baseProduction;
+        generators[i].quantity = 0;
+        if (generators[i].id > 2) generators[i].unlocked = false;
+    }
+    for (let i = 0; i < upgrades.length; i++) {
+        upgrades[i].purchased = false;
+    } // finished resetting game state except alchemy points
+    for (let i = 0; i < prestigeUpgrades.length; i++) { // reapply any prestige upgrades already bought
+        applyPrestigeUpgrade(prestigeUpgrades[i]);
+    }
+    alert(`Prestiged! You gained ${pointsGained} Alchemy Point(s).`); //notify the user
+    saveGame();
+    switchTab('generators');
+    updateUI();
+}
+
 function createGenerators() { //function to create the generator elements on the page
     const container = document.getElementById('generatorsContainer'); //get the container from the html (where the gens will be displayed on the page))
     container.innerHTML = ''; //clear existing generators so no dupes are created 
@@ -244,18 +351,18 @@ function createGenerators() { //function to create the generator elements on the
                 title.textContent = `Generator ${gen.id}`; // use ${} to insert the genid for the name displayed so use ` instead of '
 
                 const cost = document.createElement('p'); //need to show the cost
-                cost.textContent = `Cost: ${gen.cost} gold`;
+                cost.textContent = `Cost: ${formatNumber(gen.cost)} gold`;
 
                 const owned = document.createElement('p'); //need to show how many owned
-                owned.textContent = `Owned: ${gen.quantity}`;
+                owned.textContent = `Owned: ${formatNumber(gen.quantity)}`;
 
                 const production = document.createElement('p'); //need to show the production of the generator
-                production.textContent = `This generator is producing ${gen.production * gen.quantity} gold/sec `;
+                production.textContent = `This generator is producing ${formatNumber(gen.production * gen.quantity)} gold/sec `;
 
                 const button = document.createElement('button'); //create a button to buy the generator 
                 button.textContent = 'Buy 1';
                 button.disabled = gold < gen.cost; //disable the button if the player does not have enough gold to buy the generator
-                button.title = `+${gen.production} gold/sec`;
+                button.title = `+${formatNumber(gen.production)} gold/sec`;
                 button.onclick = () => buyGenerator(i); //add a button to buy, when clicked, buyGenerator will run
             
                 div.appendChild(title); //add the title to the div
@@ -294,14 +401,17 @@ function newCost(gen) { //function to calculate the new cost of a generator afte
 }
 
 function updateUI() { //function to update the user interface
-    document.getElementById('goldDisplayGenerators').textContent = `Gold: ${gold}`;
-    document.getElementById('gpsDisplayGenerators').textContent = `Gold per second: ${goldPerSecond}`; //both of these change the gold and gps display directly in the generator tab
-    document.getElementById('goldDisplayUpgrades').textContent = `Gold: ${gold}`;
-    document.getElementById('gpsDisplayUpgrades').textContent = `Gold per second: ${goldPerSecond}`; //gold and gps for upgrades tab
-    document.getElementById('goldDisplayPrestige').textContent = `Gold: ${gold}`;
-    document.getElementById('gpsDisplayPrestige').textContent = `Gold per second: ${goldPerSecond}`; //gold and gps for prestige tab
+    document.getElementById('goldDisplayGenerators').textContent = `Gold: ${formatNumber(gold)}`;
+    document.getElementById('gpsDisplayGenerators').textContent = `Gold per second: ${formatNumber(goldPerSecond)}`; //both of these change the gold and gps display directly in the generator tab
+    document.getElementById('goldDisplayUpgrades').textContent = `Gold: ${formatNumber(gold)}`;
+    document.getElementById('gpsDisplayUpgrades').textContent = `Gold per second: ${formatNumber(goldPerSecond)}`; //gold and gps for upgrades tab
+    document.getElementById('goldDisplayPrestige').textContent = `Gold: ${formatNumber(gold)}`;
+    document.getElementById('gpsDisplayPrestige').textContent = `Gold per second: ${formatNumber(goldPerSecond)}`; //gold and gps for prestige tab
+    document.getElementById('alchemyPointsDisplay').textContent = `Alchemy Points: ${alchemyPoints}`; //shows total owned alchemy points
+    document.getElementById('pointsPreview').textContent = `Alchemy Points available this run: ${calculateAlchemyPoints()}`; //shows how many alchemy points the player can gain at the current moment
     createGenerators(); //recreate the generators to update their info
     createUpgrades(); //recreate the upgrades to update their info
+    createPrestigeUpgrades(); //recreate the prestige upgrades to update their info
 }
 
 function switchTab(tabname) { //function to switch between tabs
@@ -328,7 +438,7 @@ function setFormat(format) { // updates the number format setting
     updateUI(); // refresh display
 }
 
-function formatNumber(n) {
+function formatNumber(n) { // function to format numbers based on the selected number format
     if (numberFormat === 'scientific') { //scientific notation
         return n.toExponential(2); // scientific notation with 2 decimal places
     }
@@ -363,5 +473,47 @@ function formatNumber(n) {
     }
     if (numberFormat === 'none') { //if no format is selected, just return the number
         return n;
+    }
+}
+
+function createPrestigeUpgrades() { //function to create the prestige upgrade elements on the page
+    const container = document.getElementById('prestigeUpgradesContainer'); //get the container
+    container.innerHTML = ''; //clear before creating so it doesnt duplicate
+    for (let i = 0; i < prestigeUpgrades.length; i++) { //loop through each prestige upgrade
+        const upgrade = prestigeUpgrades[i];
+        const div = document.createElement('div');
+        div.className = 'upgrade';
+
+        const title = document.createElement('h3');
+        title.textContent = `Prestige Upgrade ${upgrade.id}`;
+
+        const description = document.createElement('p');
+        description.textContent = upgrade.description;
+
+        const cost = document.createElement('p');
+        cost.textContent = `Cost: ${upgrade.cost} Alchemy Points`;
+
+        const button = document.createElement('button');
+        button.textContent = 'Buy';
+        button.disabled = alchemyPoints < upgrade.cost || upgrade.purchased; //disable if not enough points or already bought
+        button.onclick = () => buyPrestigeUpgrade(i);
+
+        div.appendChild(title);
+        div.appendChild(description);
+        div.appendChild(cost);
+        div.appendChild(button);
+        container.appendChild(div);
+    }
+}
+
+function buyPrestigeUpgrade(index) { //called when a prestige upgrade button is clicked
+    const upgrade = prestigeUpgrades[index];
+    if (alchemyPoints >= upgrade.cost && !upgrade.purchased) { //check if player can afford it and hasnt bought it
+        alchemyPoints -= upgrade.cost; //subtract the cost from alchemy points
+        upgrade.purchased = true;
+        applyPrestigeUpgrade(upgrade); //apply the effect of the upgrade
+        recalculateGoldPerSecond();
+        saveGame();
+        updateUI();
     }
 }
