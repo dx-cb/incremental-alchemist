@@ -297,7 +297,7 @@ function applyPrestigeUpgrade(upgrade) { //function to apply the effects of a pr
                 //sort later    unlock a secret generator
         }
         }
-}
+    }
 
 function calculateAlchemyPoints() { //function to calculate the amount of alchemy points the player should gain upon prestiging, will be based on the total gold the player has
     if (gold < 1e6) return 0; // no points until 1e6
@@ -440,7 +440,12 @@ function setFormat(format) { // updates the number format setting
 
 function formatNumber(n) { // function to format numbers based on the selected number format
     if (numberFormat === 'scientific') { //scientific notation
-        return n.toExponential(2); // scientific notation with 2 decimal places
+        if (n < 10) {
+            return n // if n is less than 10 dont format
+        }
+        else {
+            return n.toExponential(2); // scientific notation with 2 decimal places
+        } 
     }
     if (numberFormat === 'engineering') { //engineering notation
         if (n>999999) { // only change if if number is > 1 million 
