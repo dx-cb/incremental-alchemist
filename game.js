@@ -3,6 +3,10 @@ let goldPerSecond = 0; // the gold generated per second
 let alchemyPoints = 0; //the currency used for prestige
 let alchemyPointsPerSecond = 0; //the alchemy points generated per second, will be used in the prestige tab 
 let numberFormat = 'none'; // default number format but can also be "scientific" or "engineering" or "mixed"
+let lifetimeGold = 0; // total gold ever earned, never resets
+let totalPlaytime = 0; // seconds the game has been open
+let lifetimeClicks = 0; // total button clicks
+let currentTheme = 'dark'; // stores which theme the player currently has selected
 let generators = [ //the array of generator objects, will be referenced when creating generators and buying them
     {
         id: 1, //generator 1
@@ -66,7 +70,6 @@ let generators = [ //the array of generator objects, will be referenced when cre
         unlocked: false
     }
 ];
-
 let upgrades = [ //the array of upgrade objects, will be referenced when creating upgrades and buying them
     {   
         id: 1,
@@ -127,14 +130,25 @@ let prestigeUpgrades = [ //array of prestige upgrade objects, will be referenced
         purchased: false
     }
 ];
+let achievements = [ //array of achievement objects, will be referenced to create achievements and check if they are unlocked
+    { id: 1, name: "First Steps", description: "Earn 1,000 gold", unlocked: false, bonus: false },
+    { id: 2, name: "Gold Rush", description: "Earn 1,000,000 gold", unlocked: false, bonus: false },
+    { id: 3, name: "Alchemist", description: "Earn 1,000,000,000 gold", unlocked: false, bonus: false },
+    { id: 4, name: "Beginner", description: "Buy your first generator", unlocked: false, bonus: false },
+    { id: 5, name: "Collector", description: "Own 10 generators in total", unlocked: false, bonus: false },
+    { id: 6, name: "Master", description: "Unlock all 6 generators, all of them gain a 1.5x boost in production", unlocked: false, bonus: true },
+    { id: 7, name: "Alchemist Reborn", description: "Prestige for the first time", unlocked: false, bonus: false },
+    { id: 8, name: "Point Hoarder", description: "Earn 10 alchemy points total", unlocked: false, bonus: false },
+    { id: 9, name: "Taking a Break", description: "Play for 5 minutes", unlocked: false, bonus: false },
+    { id: 10, name: "Dedicated", description: "Play for 1 hour", unlocked: false, bonus: false },
+    { id: 11, name: "Clicker", description: "Click 100 times", unlocked: false, bonus: false },
+    { id: 12, name: "Obsessed", description: "Click 1000 times, boost generator production by 1.2x", unlocked: false, bonus: true }
+];
 
 //game loop
 
 setInterval(gameLoop, 1000); //runs the game loop every second that passes
 setInterval(saveGame, 30000); //auto saves the game every 30 seconds as a backup    
-
-
-
 
 //functions
 
@@ -145,7 +159,12 @@ function saveGame() { //function to save the game state to local storage
         generators: generators,
         upgrades: upgrades,
         alchemyPoints: alchemyPoints,
-        prestigeUpgrades: prestigeUpgrades
+        prestigeUpgrades: prestigeUpgrades,
+        lifetimeGold: lifetimeGold,       
+        totalPlaytime: totalPlaytime,     
+        lifetimeClicks: lifetimeClicks,
+        currentTheme: currentTheme,
+        achievements: achievements
     };
     localStorage.setItem('incrementalAlchemistSave', JSON.stringify(gameData)); //save the game data as a string in local storage
 }
@@ -161,6 +180,12 @@ function loadGame() { //function to load the game state from local storage
         upgrades = gameData.upgrades; //load the upgrades array
         alchemyPoints = gameData.alchemyPoints; //load the alchemy points amount
         prestigeUpgrades = gameData.prestigeUpgrades; //load the prestige upgrades array
+        lifetimeGold = gameData.lifetimeGold; //load the lifetime gold
+        totalPlaytime = gameData.totalPlaytime; //load the total playtime
+        lifetimeClicks = gameData.lifetimeClicks; //load the lifetime clicks
+        currentTheme = gameData.currentTheme; //load the current theme
+        achievements = gameData.achievements; //load the achievements array
+        setTheme(currentTheme); //apply the loaded theme
     }
 }
 
@@ -171,6 +196,10 @@ function resetGame() { //function to reset the game state and clear local storag
         gold = 10; 
         goldPerSecond = 0;
         alchemyPoints = 0;
+        let lifetimeGold = 0; 
+        let totalPlaytime = 0; 
+        let lifetimeClicks = 0; 
+
         for (let i = 0; i < generators.length; i++) { //loop through each generator to reset their values to default
             generators[i].cost = generators[i].baseCost; //reset the cost to the base cost
             generators[i].production = generators[i].baseProduction; //reset the production to the base production
@@ -183,6 +212,10 @@ function resetGame() { //function to reset the game state and clear local storag
         for (let i =0; i < upgrades.length; i++) { //loop through each upgrade to reset their values to default
             upgrades[i].purchased = false; //all upgrades should now be unbought
         }
+        for (let i = 0; i < achievements.length; i++) {//loop through the achievement array
+        achievements[i].unlocked = false; //lock all achievements again
+        }
+
         saveGame(); //replace the saved game data in local storage with the reset game data
         updateUI(); //update the user interface to reflect the reset game state
         alert("Game has been reset!"); //alert the player that the game has been reset
@@ -203,6 +236,10 @@ function startUp() { //function to run when the page loads - can add more funcio
     for (let i = 0; i < prestigeUpgrades.length; i++) { // reapply prestige upgrades on load
         applyPrestigeUpgrade(prestigeUpgrades[i]);
     }
+    document.addEventListener('click', function() 
+    {
+        lifetimeClicks += 1; // increment every time anywhere on the page is clicked
+    });
     recalculateGoldPerSecond() 
     switchTab('generators')
     updateUI()
@@ -211,6 +248,9 @@ function startUp() { //function to run when the page loads - can add more funcio
 function gameLoop() { //function to run every second to update the game state
     recalculateGoldPerSecond(); //update gps before adding gold
     gold += goldPerSecond
+    lifetimeGold += goldPerSecond
+    totalPlaytime += 1 //gameloop is called every 1 sec so total playtime increases by 1 second
+    checkAchievements(); //check if any achievements should be unlocked
     updateUI(); //update the ui so new gold and gps can be seen
     unlockGenerators(); //check if new generators should be unlocked based on current gold since the gold amount will change each game loop
 }
@@ -409,9 +449,13 @@ function updateUI() { //function to update the user interface
     document.getElementById('gpsDisplayPrestige').textContent = `Gold per second: ${formatNumber(goldPerSecond)}`; //gold and gps for prestige tab
     document.getElementById('alchemyPointsDisplay').textContent = `Alchemy Points: ${alchemyPoints}`; //shows total owned alchemy points
     document.getElementById('pointsPreview').textContent = `Alchemy Points available this run: ${calculateAlchemyPoints()}`; //shows how many alchemy points the player can gain at the current moment
+    document.getElementById('lifetimeGoldDisplay').textContent = `Lifetime Gold: ${formatNumber(lifetimeGold)}`; // updates lifetimeGold in stats
+    document.getElementById('totalPlaytimeDisplay').textContent = `Total Playtime: ${totalPlaytime} seconds`; //updates lifetimeGold in stats
+    document.getElementById('lifetimeClicksDisplay').textContent = `Lifetime Clicks: ${lifetimeClicks}`;// updates lifetimeGold in stats
     createGenerators(); //recreate the generators to update their info
     createUpgrades(); //recreate the upgrades to update their info
     createPrestigeUpgrades(); //recreate the prestige upgrades to update their info
+    createAchievements(); //recreate the achievements to update their info
 }
 
 function switchTab(tabname) { //function to switch between tabs
@@ -520,5 +564,100 @@ function buyPrestigeUpgrade(index) { //called when a prestige upgrade button is 
         recalculateGoldPerSecond();
         saveGame();
         updateUI();
+    }
+}
+
+function setTheme(theme) { // function to change the theme based on user input, will change the css variables for background colour and text colour
+}
+
+function checkAchievements() { //function to check if achievements should be unlocked
+    // gold milestones
+    if (lifetimeGold >= 1000) unlockAchievement(1);
+    if (lifetimeGold >= 1000000) unlockAchievement(2);
+    if (lifetimeGold >= 1000000000) unlockAchievement(3);
+
+    // generator milestones
+    let totalOwned = 0; // count total generators owned
+    for (let i = 0; i < generators.length; i++) {
+    totalOwned += generators[i].quantity;
+    }
+    if (totalOwned >= 1) unlockAchievement(4);
+    if (totalOwned >= 10) unlockAchievement(5);
+    
+    let allUnlocked = true; // check if all generators are unlocked
+    for (let i = 0; i < generators.length; i++) {
+        if (generators[i].unlocked === false) {
+            allUnlocked = false;
+        }
+    }
+    if (allUnlocked) unlockAchievement(6);
+
+    // prestige milestones
+    if (alchemyPoints >= 1) unlockAchievement(7);
+    if (alchemyPoints >= 10) unlockAchievement(8);
+
+    // playtime milestones
+    if (totalPlaytime >= 300) unlockAchievement(9);
+    if (totalPlaytime >= 3600) unlockAchievement(10); 
+
+    // clicks milestones
+    if (lifetimeClicks >= 100) unlockAchievement(11);
+    if (lifetimeClicks >= 1000) unlockAchievement(12);
+}
+
+function unlockAchievement(id) { // function to unlock an achievement based on its id
+    const achievement = achievements[id - 1]; // get achievement by id
+    if (!achievement.unlocked) { // only unlock if not already unlocked
+        achievement.unlocked = true;
+        alert(`Achievement unlocked: ${achievement.name}!`); // notify the player
+        if (achievement.bonus) {
+            applyAchievementBonus(id); // apply bonus if it has one
+        }
+        saveGame();
+    }
+}
+
+function applyAchievementBonus(id) { // function to apply the bonus of an achievement based on its id
+    if (id === 6) { // unlock all generators bonus
+        for (let i = 0; i < generators.length; i++) {
+            generators[i].production *= 1.5; // x1.5 all production
+        }
+    }
+    if (id === 12) { // click 1000 times bonus
+        for (let i = 0; i < generators.length; i++) {
+            generators[i].production *= 1.2; // x1.2 all production
+        }
+    }
+}
+
+function createAchievements() { // function to create the achievement elements on the page
+    const container = document.getElementById('achievementsContainer'); //get the container
+    container.innerHTML = ''; //clear before creating so it doesnt duplicate
+    for (let i = 0; i < achievements.length; i++) { //loop through the achievements array to create each achievement element
+        const achievement = achievements[i];
+        const div = document.createElement('div'); //create a div to hold the achievement info and display it on the page
+        if (achievement.unlocked) {
+            div.className = 'achievement unlocked';
+        } 
+        else {
+            div.className = 'achievement locked';
+        }
+
+        const name = document.createElement('h3'); //create an element to display the achievement name but if the achievement is locked, show ??? instead of the name
+        if (achievement.unlocked) {
+            name.textContent = achievement.name;
+        } else {
+            name.textContent = '???';
+        }
+
+        const description = document.createElement('p'); //create an element to display the achievement description but if the achievement is locked, show "Keep playing to unlock" instead of the description
+        if (achievement.unlocked) {
+            description.textContent = achievement.description;
+        } else {
+            description.textContent = 'Keep playing to unlock';
+        }
+            div.appendChild(name); //add the name to the div
+            div.appendChild(description); //add the description to the div
+            container.appendChild(div); //add the div to the container in the html
     }
 }
