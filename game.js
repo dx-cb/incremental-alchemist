@@ -196,9 +196,9 @@ function resetGame() { //function to reset the game state and clear local storag
         gold = 10; 
         goldPerSecond = 0;
         alchemyPoints = 0;
-        let lifetimeGold = 0; 
-        let totalPlaytime = 0; 
-        let lifetimeClicks = 0; 
+        lifetimeGold = 0; 
+        totalPlaytime = 0; 
+        lifetimeClicks = 0; 
 
         for (let i = 0; i < generators.length; i++) { //loop through each generator to reset their values to default
             generators[i].cost = generators[i].baseCost; //reset the cost to the base cost
@@ -568,6 +568,27 @@ function buyPrestigeUpgrade(index) { //called when a prestige upgrade button is 
 }
 
 function setTheme(theme) { // function to change the theme based on user input, will change the css variables for background colour and text colour
+    const root = document.documentElement;
+    currentTheme = theme;
+    if (theme === 'dark') { //premade
+        root.style.setProperty('--bg-color', 'rgb(60, 40, 24)');
+        root.style.setProperty('--text-color', '#aaaaaa');
+    }
+    if (theme === 'light') { //premade
+        root.style.setProperty('--bg-color', '#f0f0f0');
+        root.style.setProperty('--text-color', '#111111');
+    }
+    if (theme === 'babyblue') { //premade
+        root.style.setProperty('--bg-color', '#0a1628');
+        root.style.setProperty('--text-color', '#65adcf');
+    }
+    if (theme === 'custom') { //custom theme based on user input
+        const bg = document.getElementById('customBg').value;
+        const text = document.getElementById('customText').value;
+        root.style.setProperty('--bg-color', bg);
+        root.style.setProperty('--text-color', text);
+    }
+    saveGame();
 }
 
 function checkAchievements() { //function to check if achievements should be unlocked
