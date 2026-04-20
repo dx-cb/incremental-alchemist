@@ -73,6 +73,14 @@
 
                 <section id="wellnessSection" class="tabSection"> <!-- page for my wellness reminder thingy -->
                     <h2>Wellness</h2>
+                    <p>Take care of yourself while playing!</p>
+                    <button id="wellnessToggleButton" onclick="toggleWellness()">
+                        Break Reminder: OFF
+                    </button>
+                    <p id="wellnessStatus">Break reminders are currently OFF</p>
+                    <p>Break every how many minutes?</p>
+                    <input type="number" id="wellnessIntervalInput" value="30" min="1">
+                    <button onclick="setWellnessInterval()">Set Interval</button>
                 </section>
 
                 <section id="settingsSection" class="tabSection"> <!-- settings page -->

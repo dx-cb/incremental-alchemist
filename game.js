@@ -7,6 +7,9 @@ let lifetimeGold = 0; // total gold ever earned, never resets
 let totalPlaytime = 0; // seconds the game has been open
 let lifetimeClicks = 0; // total button clicks
 let currentTheme = 'dark'; // stores which theme the player currently has selected
+let wellnessOn = false; // whether the reminder system is on or off
+let wellnessInterval = 30; // minutes between each break
+let sessionTimer = 0; // counts seconds since last break
 let generators = [ //the array of generator objects, will be referenced when creating generators and buying them
     {
         id: 1, //generator 1
@@ -164,7 +167,9 @@ function saveGame() { //function to save the game state to local storage
         totalPlaytime: totalPlaytime,     
         lifetimeClicks: lifetimeClicks,
         currentTheme: currentTheme,
-        achievements: achievements
+        achievements: achievements,
+        wellnessOn: wellnessOn,
+        wellnessInterval: wellnessInterval
     };
     localStorage.setItem('incrementalAlchemistSave', JSON.stringify(gameData)); //save the game data as a string in local storage
 }
@@ -185,6 +190,8 @@ function loadGame() { //function to load the game state from local storage
         lifetimeClicks = gameData.lifetimeClicks; //load the lifetime clicks
         currentTheme = gameData.currentTheme; //load the current theme
         achievements = gameData.achievements; //load the achievements array
+        wellnessOn = gameData.wellnessOn; //load the toggle for the break remdinder system
+        wellnessInterval = gameData.wellnessInterval; //
         setTheme(currentTheme); //apply the loaded theme
     }
 }
@@ -253,6 +260,7 @@ function gameLoop() { //function to run every second to update the game state
     checkAchievements(); //check if any achievements should be unlocked
     updateUI(); //update the ui so new gold and gps can be seen
     unlockGenerators(); //check if new generators should be unlocked based on current gold since the gold amount will change each game loop
+    checkForBreak(); //check if the wellness reminder should alert the player to take a break
 }
 
 function createUpgrades() { //function to create the upgrade elements on the page
@@ -452,6 +460,11 @@ function updateUI() { //function to update the user interface
     document.getElementById('lifetimeGoldDisplay').textContent = `Lifetime Gold: ${formatNumber(lifetimeGold)}`; // updates lifetimeGold in stats
     document.getElementById('totalPlaytimeDisplay').textContent = `Total Playtime: ${totalPlaytime} seconds`; //updates lifetimeGold in stats
     document.getElementById('lifetimeClicksDisplay').textContent = `Lifetime Clicks: ${lifetimeClicks}`;// updates lifetimeGold in stats
+    if (wellnessOn) { //if the wellness reminder system is on then update the button text to show that it is on
+        document.getElementById('wellnessToggleButton').textContent = 'Break Reminder: ON';
+    } else {
+        document.getElementById('wellnessToggleButton').textContent = 'Break Reminder: OFF';
+    }
     createGenerators(); //recreate the generators to update their info
     createUpgrades(); //recreate the upgrades to update their info
     createPrestigeUpgrades(); //recreate the prestige upgrades to update their info
@@ -681,4 +694,33 @@ function createAchievements() { // function to create the achievement elements o
             div.appendChild(description); //add the description to the div
             container.appendChild(div); //add the div to the container in the html
     }
+}
+
+function checkForBreak() { //function to check if the wellness reminder should alert the player to take a break
+    if (wellnessOn) { //if the reminder system is on
+        sessionTimer += 1; // increment every second
+        if (sessionTimer >= wellnessInterval * 60) { // convert minutes to seconds
+            alert("Time for a break! Take a rest, drink some water, or go for a walk.");
+            sessionTimer = 0; // reset the timer after the break
+        }
+    }
+}
+
+function setWellnessInterval() { //function to check the user input for the wellness reminder interval and update wellnessInterval variable
+    const input = document.getElementById('wellnessIntervalInput').value;
+    const parsed = parseInt(input); // convert string input to integer
+    if (parsed > 0) { // make sure its a valid positive number
+        wellnessInterval = parsed;
+        saveGame();
+        alert(`Break reminder set to every ${wellnessInterval} minutes`);
+    } else {
+        alert('Please enter a valid number of minutes'); // reject 0 or negative
+    }
+}
+
+function toggleWellness() { //function to switch the break reminder on and off
+    wellnessOn = !wellnessOn; // flip between true and false
+    sessionTimer = 0; // reset timer when toggled
+    saveGame();
+    updateUI();
 }
