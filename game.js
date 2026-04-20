@@ -584,22 +584,58 @@ function setTheme(theme) { // function to change the theme based on user input, 
     const root = document.documentElement;
     currentTheme = theme;
     if (theme === 'dark') { //premade
-        root.style.setProperty('--bg-color', 'rgb(60, 40, 24)');
-        root.style.setProperty('--text-color', '#aaaaaa');
+        root.style.setProperty('--bg-color', '#0b0b0b');
+        root.style.setProperty('--text-color', '#e0e0e0');
+        root.style.setProperty('--accent', '#4da6ff');
+        root.style.setProperty('--card-bg', '#161616');
+        root.style.setProperty('--card-border', '#333333');
+        root.style.setProperty('--nav-bg', '#050505');
+        root.style.setProperty('--nav-border', '#222222');
+        root.style.setProperty('--btn-bg', '#1d1d1d');
+        root.style.setProperty('--btn-hover', '#252525');
+        root.style.setProperty('--btn-border', '#444444');
+        root.style.setProperty('--btn-text', '#e0e0e0');
     }
     if (theme === 'light') { //premade
-        root.style.setProperty('--bg-color', '#f0f0f0');
-        root.style.setProperty('--text-color', '#111111');
+        root.style.setProperty('--bg-color', '#f5f5f0');
+        root.style.setProperty('--text-color', '#1a1a1a');
+        root.style.setProperty('--accent', '#2563eb');
+        root.style.setProperty('--card-bg', '#ffffff');
+        root.style.setProperty('--card-border', '#d1d1d1');
+        root.style.setProperty('--nav-bg', '#e8e8e3');
+        root.style.setProperty('--nav-border', '#cccccc');
+        root.style.setProperty('--btn-bg', '#e8e8e3');       // light grey
+        root.style.setProperty('--btn-hover', '#d8d8d3');    // slightly darker on hover
+        root.style.setProperty('--btn-border', '#bbbbbb');
+        root.style.setProperty('--btn-text', '#1a1a1a');     // dark text so it's readable
     }
     if (theme === 'babyblue') { //premade
         root.style.setProperty('--bg-color', '#0a1628');
-        root.style.setProperty('--text-color', '#65adcf');
+        root.style.setProperty('--text-color', '#a8d4f0');
+        root.style.setProperty('--accent', '#65adcf');
+        root.style.setProperty('--card-bg', '#0f1f38');
+        root.style.setProperty('--card-border', '#1e3a5f');
+        root.style.setProperty('--nav-bg', '#070f1e');
+        root.style.setProperty('--nav-border', '#162840');
+        root.style.setProperty('--btn-bg', '#0f1f38');
+        root.style.setProperty('--btn-hover', '#162d4a');
+        root.style.setProperty('--btn-border', '#1e3a5f');
+        root.style.setProperty('--btn-text', '#a8d4f0');
     }
     if (theme === 'custom') { //custom theme based on user input
         const bg = document.getElementById('customBg').value;
         const text = document.getElementById('customText').value;
         root.style.setProperty('--bg-color', bg);
         root.style.setProperty('--text-color', text);
+        root.style.setProperty('--accent', text);
+        root.style.setProperty('--card-bg', bg);
+        root.style.setProperty('--card-border', text + '33');
+        root.style.setProperty('--nav-bg', bg);
+        root.style.setProperty('--nav-border', text + '22');
+        root.style.setProperty('--btn-bg', text + '15');
+        root.style.setProperty('--btn-hover', text + '25');
+        root.style.setProperty('--btn-border', text + '44');
+        root.style.setProperty('--btn-text', text);
     }
     saveGame();
 }
