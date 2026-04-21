@@ -13,6 +13,7 @@ let sessionTimer = 0; // counts seconds since last break
 let generators = [ //the array of generator objects, will be referenced when creating generators and buying them
     {
         id: 1, //generator 1
+        name: "Copper Cup",
         baseCost: 10,
         cost: 10,
         baseProduction: 1,
@@ -24,6 +25,7 @@ let generators = [ //the array of generator objects, will be referenced when cre
     },
     {
         id: 2, //generator 2
+        name: "Silver Cruicible",
         baseCost: 100,
         cost: 100,
         baseProduction: 10,
@@ -34,6 +36,7 @@ let generators = [ //the array of generator objects, will be referenced when cre
     },
     {
         id: 3, //generator 3
+        name: "Arcane Furnace",
         baseCost: 1000,
         cost: 1000,
         baseProduction: 50,
@@ -44,6 +47,7 @@ let generators = [ //the array of generator objects, will be referenced when cre
     },
     {
         id: 4, //generator 4
+        name: "Philosopher's Stone",
         baseCost: 10000,
         cost: 10000,
         baseProduction: 500,
@@ -53,7 +57,8 @@ let generators = [ //the array of generator objects, will be referenced when cre
         unlocked: false
     },
     {
-        id: 5, //generator 5    
+        id: 5, //generator 5   
+        name: "Celestial Condenser", 
         baseCost: 100000,
         cost: 100000,
         baseProduction: 3000,
@@ -64,6 +69,7 @@ let generators = [ //the array of generator objects, will be referenced when cre
     },
     {
         id: 6, //generator 6
+        name: "Void Extractor",
         baseCost: 1000000,
         cost: 1000000,
         baseProduction: 20000,
@@ -76,21 +82,21 @@ let generators = [ //the array of generator objects, will be referenced when cre
 let upgrades = [ //the array of upgrade objects, will be referenced when creating upgrades and buying them
     {   
         id: 1,
-        name: "",
+        name: "Copper Refinement",
         description: "Double Generator 1 production",
         cost: 25,
         purchased: false
     },
     {
         id: 2,
-        name: "",
+        name: "Silver Purification",
         description: "Double Generator 2 production",
         cost: 250,
         purchased: false
     },
     {
         id: 3,
-        name: "",
+        name: "Grand Transmutation",
         description: "Increase all generator production by 50%",
         cost: 2500,
         purchased: false
@@ -99,35 +105,35 @@ let upgrades = [ //the array of upgrade objects, will be referenced when creatin
 let prestigeUpgrades = [ //array of prestige upgrade objects, will be referenced when creating prestige upgrades and buying them
     {
         id: 1,
-        name: "",
+        name: "Alchemy Mastery",
         description: "Increase alchemy point gain by 50%",
         cost: 1,
         purchased: false
     },
     {
         id: 2,
-        name: "",
+        name: "Golden Touch",
         description: "Increase gold gain by 20%",
         cost: 1,
         purchased: false
     },
     {
         id: 3,
-        name: "",
+        name: "Transmuter's Greed",
         description: "x2 all generator production",
         cost: 1,
         purchased: false
     },
     {
         id: 4,
-        name: "",
+        name: "Quintessence",
         description: "x5 all generator production",
         cost: 2,
         purchased: false
     },
     {
         id: 5,
-        name: "",
+        name: "The Great Work",
         description: "Unlock a secret generator...",
         cost: 100,
         purchased: false
@@ -272,7 +278,7 @@ function createUpgrades() { //function to create the upgrade elements on the pag
         div.className = "upgrade"; //class name for css
 
         const title = document.createElement("h3");//title element
-        title.textContent = `Upgrade ${upgrade.id}`;
+        title.textContent = `${upgrade.name}`;
 
         const description = document.createElement("p");//description element
         description.textContent = upgrade.description;
@@ -345,7 +351,7 @@ function applyPrestigeUpgrade(upgrade) { //function to apply the effects of a pr
                 //sort later    unlock a secret generator
         }
         }
-    }
+}
 
 function calculateAlchemyPoints() { //function to calculate the amount of alchemy points the player should gain upon prestiging, will be based on the total gold the player has
     if (gold < 1e6) return 0; // no points until 1e6
@@ -396,7 +402,7 @@ function createGenerators() { //function to create the generator elements on the
                 div.className = 'generator'; //set the class to use css on the gens created
 
                 const title = document.createElement('h3'); //create a title element to display the generator name
-                title.textContent = `Generator ${gen.id}`; // use ${} to insert the genid for the name displayed so use ` instead of '
+                title.textContent = `${gen.name}`; // use ${} to insert the genid for the name displayed so use ` instead of '
 
                 const cost = document.createElement('p'); //need to show the cost
                 cost.textContent = `Cost: ${formatNumber(gen.cost)} gold`;
@@ -405,7 +411,7 @@ function createGenerators() { //function to create the generator elements on the
                 owned.textContent = `Owned: ${formatNumber(gen.quantity)}`;
 
                 const production = document.createElement('p'); //need to show the production of the generator
-                production.textContent = `This generator is producing ${formatNumber(gen.production * gen.quantity)} gold/sec `;
+                production.textContent = `${gen.name} is producing ${formatNumber(gen.production * gen.quantity)} gold/sec`;
 
                 const button = document.createElement('button'); //create a button to buy the generator 
                 button.textContent = 'Buy 1';
@@ -547,7 +553,7 @@ function createPrestigeUpgrades() { //function to create the prestige upgrade el
         div.className = 'upgrade';
 
         const title = document.createElement('h3');
-        title.textContent = `Prestige Upgrade ${upgrade.id}`;
+        title.textContent = `${upgrade.name}`;
 
         const description = document.createElement('p');
         description.textContent = upgrade.description;

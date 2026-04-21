@@ -52,7 +52,7 @@ nav {
 }
 
 nav::before {
-    content: '⚗ Alchemist';
+    content: 'Incremental Alchemist';
     display: block;
     color: var(--accent);
     font-size: 14px;
