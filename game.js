@@ -175,7 +175,8 @@ function saveGame() { //function to save the game state to local storage
         currentTheme: currentTheme,
         achievements: achievements,
         wellnessOn: wellnessOn,
-        wellnessInterval: wellnessInterval
+        wellnessInterval: wellnessInterval,
+        numberFormat: numberFormat
     };
     localStorage.setItem('incrementalAlchemistSave', JSON.stringify(gameData)); //save the game data as a string in local storage
 }
@@ -197,7 +198,8 @@ function loadGame() { //function to load the game state from local storage
         currentTheme = gameData.currentTheme; //load the current theme
         achievements = gameData.achievements; //load the achievements array
         wellnessOn = gameData.wellnessOn; //load the toggle for the break remdinder system
-        wellnessInterval = gameData.wellnessInterval; //
+        wellnessInterval = gameData.wellnessInterval; //load wellness interval
+        numberFormat = gameData.numberFormat; //load number formatting
         setTheme(currentTheme); //apply the loaded theme
     }
 }
@@ -502,6 +504,8 @@ function setFormat(format) { // updates the number format setting
 }
 
 function formatNumber(n) { // function to format numbers based on the selected number format
+    n = parseFloat(n.toFixed(1)); // rounds to 1dp
+
     if (numberFormat === 'scientific') { //scientific notation
         if (n < 10) {
             return n // if n is less than 10 dont format
