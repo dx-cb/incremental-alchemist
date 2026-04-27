@@ -755,7 +755,7 @@ function checkForBreak() { //function to check if the wellness reminder should a
 function setWellnessInterval() { //function to check the user input for the wellness reminder interval and update wellnessInterval variable
     const input = document.getElementById('wellnessIntervalInput').value;
     const parsed = parseInt(input); // convert string input to integer
-    if (parsed > 0) { // make sure its a valid positive number
+    if (parsed > 0 && !input.includes('.')) { // make sure its a valid positive number and an integer
         wellnessInterval = parsed;
         saveGame();
         alert(`Break reminder set to every ${wellnessInterval} minutes`);
